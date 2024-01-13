@@ -26,4 +26,4 @@ function createPost(post, callback) {
     }, 1000);
 }
 
-createPost({ title: "third post", body: "hello there mate!" }, getPosts)
+createPost({ title: "third post", body: "hello there mate!" }, getPosts);

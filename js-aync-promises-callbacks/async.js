@@ -39,18 +39,17 @@ function createPost(post) {
 
 }
 
-createPost({ title: "third post", body: "hello there mate!" })
-    .then(getPosts)
-    .catch(err => console.log(err));
+// aynsc / await
+async function init() {
+    await createPost({ title: "third post", body: "hello there mate!" })
+    getPosts();
+}
 
-//Promise.all
-// const promise1 = Promise.resolve("Hello World");
-// const promise2 = Promise.resolve(10);
-// const promise3 = new Promise((resolve, reject) => setTimeout(resolve, 2000, "GoodBye"));
-
-// const promise4 = fetch('https://jsonplaceholder.typicode.com/users')
-//     .then(response => response.json())
-// // .then(json => console.log(json))
-
-// Promise.all([promise1, promise2, promise3, promise4])
-//     .then(values => console.log(values));
+// async / await / fetch
+async function fetchUsers() {
+    const res = await fetch('https://jsonplaceholder.typicode.com/users');
+    const data = await res.json();
+    console.log(data);
+}
+init();
+fetchUsers();
