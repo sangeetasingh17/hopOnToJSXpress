@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import Todos from "./components/Todos";
 import Header from "./components/Header";
@@ -33,40 +33,92 @@ const App: React.FC = () => {
     },
   ]);
 
-  const addTodo = (todo: TodoProps) => {
-    const updatedTodo = {
-      ...todo,
-      id: tasks.length + 1,
-    };
-    // console.log(updatedTodo);
-    setTasks((prevTasks) => [...prevTasks, updatedTodo]);
+
+  const fetchTasks = () => {
+    fetch('/tasks')
+      .then(response => response.json())
+      .then(data => setTasks(data.tasks))
+      .catch(error => console.error("Error fetching tasks:", error));
   };
 
-  const editTodo = (todo: TodoProps) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === todo.id
-          ? {
-              ...task,
-              title: todo.title,
-              day: todo.day,
-              description: todo.description,
-            }
-          : task
-      )
-    );
+  // Call this function when your component mounts or when you need to refresh the task list
+  useEffect(() => {
+    fetchTasks();
+  }, [setTasks]);
+
+
+  const addTodo = (todo: TodoProps) => {
+    fetch("/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(todo),
+    })
+      .then((response) => response.json())
+      // .then((data) => setTasks((prevTasks) => [...prevTasks, data]))
+      .then((data) => {
+        console.log(data.message);
+        // setTasks((prevData))
+        setTasks((prevTasks) => [...prevTasks, data]);
+        // fetchTasks();
+      })
+      .catch((error) => console.error("Error adding task:", error));
+  };
+
+  const editTodo = (edit_id: number) => {
+    fetch(`/tasks/${edit_id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(editedTask),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.message);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === edit_id ? { ...task, id: edit_id } : task
+          )
+        );
+      })
+      .catch(error => console.error('Error editing task:', error));
+
   };
 
   const deleteTask = (id: number) => {
-    setTasks(tasks.filter((task) => task.id !== id)); //the filter method to create a new array that includes only those elements from the original tasks array where the id does not match the provided id.
+    fetch(`/tasks/${id}`, {
+      method: 'DELETE',
+    })
+      .then(response => response.json())
+      .then(data => {
+        // console.log(data.message);
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+      })
+      .catch(error => console.error('Error deleting task:', error));
   };
 
   const todoCompleted = (id: number) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, done: !task.done } : task
-      )
+    const updatedTasks = tasks.map(task =>
+      task.id === id ? { ...task, done: !task.done } : task
     );
+
+    const updatedTask = updatedTasks.find(task => task.id === id);
+
+    if (updatedTask) {
+      fetch(`/tasks/complete/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTask),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.message);
+          setTasks(updatedTasks);
+        })
+        .catch(error => console.error('Error updating task:', error));
+    }
   };
 
   const toggleShowForm = () => {
@@ -81,10 +133,12 @@ const App: React.FC = () => {
 
   // console.log("editedTask", editedTask);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const closeForm = () => {
     setShowEditForm(false);
     setShowForm(false);
   };
+
 
   return (
     <div className="App">

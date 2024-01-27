@@ -1,5 +1,4 @@
 import { FaEdit, FaTimes } from "react-icons/fa";
-import Button from "./Button";
 
 export interface TodoProps {
   id: number;

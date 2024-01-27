@@ -10,7 +10,7 @@ interface FormDataProps {
 
 interface onAddProps {
   onAdd(todo: TodoProps): void;
-  onEdit(todo: TodoProps): void;
+  onEdit(id: number): void;
   closeForm(): void;
   editedTask: TodoProps | undefined;
   isCreateView: boolean;
@@ -30,8 +30,6 @@ const CreateTodo = ({
     day: "",
     desc: "",
   });
-  console.log("isCreateView:", isCreateView);
-  console.log("isEditView:", isEditView);
 
   useEffect(() => {
     if (isCreateView) {
@@ -83,7 +81,7 @@ const CreateTodo = ({
     if (!editedTask) {
       onAdd(newTodo);
     } else {
-      onEdit(editedTodo);
+      onEdit(editedTodo.id);
     }
 
     setFormData({
