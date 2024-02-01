@@ -2,8 +2,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import Button from "./Button";
 import { TodoProps } from "./Todo";
 import { DatePicker, Input } from "antd";
-import { useNavigate } from "react-router-dom";
-import moment from "moment";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 
 interface FormDataProps {
@@ -12,11 +11,12 @@ interface FormDataProps {
   desc: string;
 }
 
-interface onAddProps {
-  onAdd(todo: TodoProps): any;
+interface EditTodoProps {
+  prevTasks: TodoProps[];
+  editTask: (todo: any) => void;
 }
 
-const CreateTodo = ({ onAdd }: onAddProps) => {
+const EditTodo = ({ prevTasks, editTask }: EditTodoProps) => {
   const [formData, setFormData] = useState<FormDataProps>({
     title: "",
     day: "",
@@ -24,6 +24,21 @@ const CreateTodo = ({ onAdd }: onAddProps) => {
   });
 
   const navigate = useNavigate();
+  const pathParam = useParams();
+  const location = useLocation();
+  console.log("location:", location);
+
+  useEffect(() => {
+    const taskToBeEdited = prevTasks.find(
+      (task) => task.id === Number(pathParam.id)
+    );
+
+    setFormData({
+      title: taskToBeEdited ? taskToBeEdited.title : "",
+      day: taskToBeEdited ? taskToBeEdited.day : "",
+      desc: taskToBeEdited ? taskToBeEdited.description : "",
+    });
+  }, [prevTasks, pathParam]);
 
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -44,15 +59,14 @@ const CreateTodo = ({ onAdd }: onAddProps) => {
       return;
     }
 
-    const newTodo: TodoProps = {
-      id: 0,
+    const editedTodo: any = {
+      id: Number(pathParam.id),
       title: formData.title,
       day: formData.day,
       description: formData.desc,
       done: false,
     };
-
-    onAdd(newTodo);
+    editTask(editedTodo);
     navigate("/");
   };
   console.warn(formData);
@@ -82,9 +96,7 @@ const CreateTodo = ({ onAdd }: onAddProps) => {
             onChange={handleDateChange}
             showTime={true}
             format={"MMM DD YYYY hh:mm a "}
-            // placeholder={editedTask ? defaultDate : ""}
-            // defaultValue={editedTask ? defaultDate : currentDate}
-            // value={dayjs(formData.day, "MMM DD YYYY hh:mm a ")}
+            value={dayjs(formData.day, "MMM DD YYYY hh:mm a ")}
           />
         </div>
 
@@ -99,11 +111,11 @@ const CreateTodo = ({ onAdd }: onAddProps) => {
           />
         </div>
 
-        <Button color="#27ae60" text="Done" onClick={onSubmit} />
+        <Button color="black" text="Update" onClick={onSubmit} />
         <Button color="grey" text="Cancel" onClick={navigateCloseForm} />
       </form>
     </>
   );
 };
 
-export default CreateTodo;
+export default EditTodo;

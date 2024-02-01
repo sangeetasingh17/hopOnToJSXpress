@@ -4,31 +4,34 @@ import Todos from "./components/Todos";
 import Header from "./components/Header";
 import { TodoProps } from "./components/Todo";
 import CreateTodo from "./components/CreateTodo";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import EditTodo from "./components/EditTodo";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useParams,
+} from "react-router-dom";
 
 const App: React.FC = () => {
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const [showEditForm, setShowEditForm] = useState<boolean>(false);
-  const [editedTask, setEditedTask] = useState<TodoProps>();
   const [tasks, setTasks] = useState<TodoProps[]>([
     {
       id: 1,
       title: "CP",
-      day: "Feb 5th at 2:30pm",
+      day: "Feb 5 2024 04:30 pm ",
       description: "codeforces 5 questions and leetcode 3",
       done: false,
     },
     {
       id: 2,
       title: "grocery shopping",
-      day: "Jun 2nd at 12pm",
+      day: "Jan 31 2024 04:00 pm ",
       description: "vegies, paneer, aloo",
       done: false,
     },
     {
       id: 3,
       title: "goa trip",
-      day: "Dec 28th at 5am",
+      day: "Mar 02 2024 02:00 pm ",
       description: "codeforces 5 questions and leetcode 3",
       done: false,
     },
@@ -43,7 +46,8 @@ const App: React.FC = () => {
     setTasks((prevTasks) => [...prevTasks, updatedTodo]);
   };
 
-  const editTodo = (todo: TodoProps) => {
+  const editTask = (todo: any) => {
+    console.warn(todo);
     setTasks(
       tasks.map((task) =>
         task.id === todo.id
@@ -70,75 +74,32 @@ const App: React.FC = () => {
     );
   };
 
-  const toggleShowForm = () => {
-    setShowEditForm(false);
-    setShowForm(true);
-  };
-
-  const toggleShowEditform = () => {
-    setShowForm(false);
-    setShowEditForm(true);
-  };
-
-  console.warn(showEditForm, editedTask);
-
-  const closeForm = () => {
-    setShowEditForm(false);
-    setShowForm(false);
-  };
-
   // --------------------------------------------------
 
   return (
-    <Router>
-      <div className="App">
-        <Header toggleShowForm={toggleShowForm} showForm={showForm} />
-        <Routes>
-          <Route
-            path="/create"
-            element={
-              showForm && (
-                <CreateTodo
-                  onAdd={addTodo}
-                  onEdit={editTodo}
-                  closeForm={closeForm}
-                  editedTask={editedTask}
-                  isCreateView={showForm}
-                  isEditView={showEditForm}
-                />
-              )
-            }
-          />
-          <Route
-            path="/edit/:id"
-            element={
-              showEditForm && (
-                <CreateTodo
-                  onAdd={addTodo}
-                  onEdit={editTodo}
-                  closeForm={closeForm}
-                  editedTask={editedTask}
-                  isCreateView={showForm}
-                  isEditView={showEditForm}
-                />
-              )
-            }
-          />
-        </Routes>
-
-        {tasks.length > 0 ? (
-          <Todos
-            tasks={tasks}
-            onDelete={deleteTask}
-            onComplete={todoCompleted}
-            toggleShowEditform={toggleShowEditform}
-            onEditedTask={setEditedTask}
-          />
-        ) : (
-          <h4>No Todos</h4>
-        )}
-      </div>
-    </Router>
+    <div className="App">
+      <Routes>
+        <Route
+          path="/"
+          element={[
+            <Header />,
+            <Todos
+              tasks={tasks}
+              onDelete={deleteTask}
+              // onEdit={editTask}
+              onComplete={todoCompleted}
+            />,
+          ]}
+        />
+        <Route path="/create" element={<CreateTodo onAdd={addTodo} />} />
+        <Route
+          path="/edit/:id"
+          element={<EditTodo prevTasks={tasks} editTask={editTask} />}
+          errorElement={<h1>Error</h1>}
+        />
+        {/* <Route path="/edit/:id" element={<EditTodo tasks={tasks} />} /> */}
+      </Routes>
+    </div>
   );
 };
 

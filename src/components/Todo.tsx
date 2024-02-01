@@ -1,8 +1,7 @@
 import { FaEdit, FaTimes } from "react-icons/fa";
 import { Switch, Modal } from "antd";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const confirm = Modal.confirm;
 
@@ -13,23 +12,13 @@ export interface TodoProps {
   description: string;
   done: boolean;
   onDelete?(id: number): void;
+  // onEdit?: (todo: TodoProps) => void;
   onComplete?(id: number): void;
-  toggleShowEditform?(): void;
-  onEditedTask?(todo: TodoProps): any;
 }
 
-const Todo = ({
-  onDelete,
-  onComplete,
-  toggleShowEditform,
-  onEditedTask,
-  ...task
-}: TodoProps) => {
-  const handleDelete = () => {
-    if (onDelete) onDelete(task.id);
-  };
-
+const Todo = ({ onDelete, onComplete, ...task }: TodoProps) => {
   const [checked, setChecked] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleDoubleClick = () => {
     if (!checked) {
@@ -55,13 +44,13 @@ const Todo = ({
     }
   };
 
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const handleDelete = () => {
+    onDelete?.(task.id);
+  };
 
   const handleEdit = () => {
-    toggleShowEditform?.();
-    onEditedTask?.(task);
-    navigate("/edit");
+    navigate(`/edit/${task.id}`);
+    console.warn(task);
   };
 
   return (
@@ -71,16 +60,13 @@ const Todo = ({
         <div className="right-items">
           <Switch
             style={{ marginRight: "25px" }}
-            // onChange={handleDoubleClick}
             onClick={handleDoubleClick}
             checked={checked}
           />
-          <Link to={`/edit/${task.id}`}>
-            <FaEdit
-              style={{ color: "green", marginRight: "10px" }}
-              onClick={handleEdit}
-            />
-          </Link>
+          <FaEdit
+            style={{ color: "green", marginRight: "10px" }}
+            onClick={handleEdit}
+          />
 
           <FaTimes
             style={{ color: "red", marginLeft: "10px" }}
